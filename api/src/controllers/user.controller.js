@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken"
 import User from "../models/user.model.js"
 import ApiError from "../utils/apiError.js"
 import { compareToken, generateAccessToken, generateRefreshToken, hashToken } from "../utils/generateTokens.js"
@@ -181,6 +182,11 @@ export const refreshAccessTokenController = async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    accessToken: newAccessToken
+    accessToken: newAccessToken,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email
+    }
   })
 }

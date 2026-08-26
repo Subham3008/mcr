@@ -1,9 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import api from "../services/api";
+import { useState } from "react";
+
+import useAuth from "../hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  const { login } = useAuth();
+
+  const [serverError, setServerError] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -12,27 +19,33 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await api.post("/auth/login", data);
+      setServerError("");
 
-      const { accessToken, user } = response.data;
+      await login(data);
 
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", JSON.stringify(user));
       navigate("/dashboard");
     } catch (error) {
-      console.error(error.response?.data?.message || "Login failed");
+      setServerError(error.response?.data?.message || "Login failed");
     }
   };
+
   return (
     <div>
       <h1>Login</h1>
+
+      {serverError && <p>{serverError}</p>}
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
           type="email"
           placeholder="Email"
-          {...register("email", { required: "Email is required" })}
+          {...register("email", {
+            required: "Email is required",
+          })}
         />
+
         {errors.email && <p>{errors.email.message}</p>}
+
         <input
           type="password"
           placeholder="Password"
@@ -40,12 +53,14 @@ const Login = () => {
             required: "Password is required",
           })}
         />
+
         {errors.password && <p>{errors.password.message}</p>}
 
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Logging in..." : "Login"}
         </button>
       </form>
+
       <p>
         Don't have an account? <Link to="/register">Register</Link>
       </p>

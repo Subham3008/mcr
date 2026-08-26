@@ -1,9 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import api from "../services/api";
+import { useState } from "react";
+
+import useAuth from "../hooks/useAuth";
 
 const Register = () => {
   const navigate = useNavigate();
+
+  const { registerUser } = useAuth();
+
+  const [serverError, setServerError] = useState("");
 
   const {
     register,
@@ -13,23 +19,21 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await api.post("/auth/register", data);
+      setServerError("");
 
-      const { accessToken, user } = response.data;
-
-      localStorage.setItem("accessToken", accessToken);
-
-      localStorage.setItem("user", JSON.stringify(user));
+      await registerUser(data);
 
       navigate("/dashboard");
     } catch (error) {
-      console.log(error.response?.data?.message || "Registration failed");
+      setServerError(error.response?.data?.message || "Registration failed");
     }
   };
 
   return (
     <div>
       <h1>Register</h1>
+
+      {serverError && <p>{serverError}</p>}
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <input
@@ -57,6 +61,7 @@ const Register = () => {
           placeholder="Password"
           {...register("password", {
             required: "Password is required",
+
             minLength: {
               value: 6,
               message: "Password must be at least 6 characters",

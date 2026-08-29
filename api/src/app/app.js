@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import appRoutes from "../routes/index.routes.js"
+import { errorHandler } from "../middlewares/errorHandler.js"
 
 
 dotenv.config()
@@ -27,5 +28,8 @@ app.get("/health", (req, res) => {
 })
 
 app.use("/api", appRoutes)
+
+//--global error middleware------->>
+app.use(errorHandler)
 
 export default app
